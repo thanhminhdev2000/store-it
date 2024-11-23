@@ -7,9 +7,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface Props {
-  fullName?: string;
-  avatar?: string;
-  email?: string;
+  fullName: string;
+  avatar: string;
+  email: string;
 }
 
 const Sidebar = ({ fullName, avatar, email }: Props) => {

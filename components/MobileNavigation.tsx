@@ -15,13 +15,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import FileUploader from "./FileUploader";
 
 interface Props {
-  $id?: string;
-  accountId?: string;
-  fullName?: string;
-  avatar?: string;
-  email?: string;
+  $id: string;
+  accountId: string;
+  fullName: string;
+  avatar: string;
+  email: string;
 }
 
 const MobileNavigation = ({
@@ -101,7 +102,7 @@ const MobileNavigation = ({
           <Separator className="my-5 bg-light-200/20" />
 
           <div className="flex flex-col justify-between gap-5 pb-5">
-            {/* <FileUploader ownerId={ownerId} accountId={accountId} /> */}
+            <FileUploader ownerId={ownerId} accountId={accountId} />
             <Button
               type="submit"
               className="mobile-sign-out-button"
