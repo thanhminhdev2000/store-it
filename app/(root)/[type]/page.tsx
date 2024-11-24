@@ -13,8 +13,6 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
 
   const files = await getFiles({ types, searchText, sort });
 
-  console.log(files);
-
   return (
     <div className="page-container">
       <section className="w-full">

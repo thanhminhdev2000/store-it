@@ -1,7 +1,7 @@
 "use server";
 
 import { getCurrentUser } from "@/lib/actions/user.actions";
-import { createAdminClient, createSessionClient } from "@/lib/appwrite";
+import { createAdminClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
@@ -24,12 +24,10 @@ export const uploadFile = async ({
   try {
     const inputFile = InputFile.fromBuffer(file, file.name);
 
-    console.log("appwriteConfig.bucketId", appwriteConfig.bucketId)
-
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
       ID.unique(),
-      inputFile,
+      inputFile
     );
 
     const fileDocument = {
@@ -49,7 +47,7 @@ export const uploadFile = async ({
         appwriteConfig.databaseId,
         appwriteConfig.filesCollectionId,
         ID.unique(),
-        fileDocument,
+        fileDocument
       )
       .catch(async (error: unknown) => {
         await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
@@ -68,7 +66,7 @@ const createQueries = (
   types: string[],
   searchText: string,
   sort: string,
-  limit?: number,
+  limit?: number
 ) => {
   const queries = [
     Query.or([
@@ -85,7 +83,7 @@ const createQueries = (
     const [sortBy, orderBy] = sort.split("-");
 
     queries.push(
-      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy),
+      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy)
     );
   }
 
@@ -110,10 +108,9 @@ export const getFiles = async ({
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      queries,
+      queries
     );
 
-    console.log({ files });
     return parseStringify(files);
   } catch (error) {
     handleError(error, "Failed to get files");
@@ -136,7 +133,7 @@ export const renameFile = async ({
       fileId,
       {
         name: newName,
-      },
+      }
     );
 
     revalidatePath(path);
@@ -160,7 +157,7 @@ export const updateFileUsers = async ({
       fileId,
       {
         users: emails,
-      },
+      }
     );
 
     revalidatePath(path);
@@ -181,7 +178,7 @@ export const deleteFile = async ({
     const deletedFile = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      fileId,
+      fileId
     );
 
     if (deletedFile) {
@@ -198,15 +195,8 @@ export const deleteFile = async ({
 // ============================== TOTAL FILE SPACE USED
 export async function getTotalSpaceUsed() {
   try {
-    const { databases } = await createSessionClient();
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User is not authenticated.");
-
-    const files = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.filesCollectionId,
-      [Query.equal("owner", [currentUser.$id])],
-    );
 
     const totalSpace = {
       image: { size: 0, latestDate: "" },
@@ -218,7 +208,7 @@ export async function getTotalSpaceUsed() {
       all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
     };
 
-    files.documents.forEach((file) => {
+    currentUser.files.forEach((file: Models.Document) => {
       const fileType = file.type as FileType;
       totalSpace[fileType].size += file.size;
       totalSpace.used += file.size;
